@@ -1,0 +1,16 @@
+{
+  "name": "exercicio1_tarefas",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "JPTirso",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start:dev": "nodemon servidor.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "nodemon": "^3.1.14"
+  }
+}
