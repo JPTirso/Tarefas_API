@@ -18,8 +18,8 @@ router.get("/tarefas", buscarTarefas);
 
 router.get("/tarefas/:id", buscarTarefasById);
 
-router.delete("/tarefas/:id", deletarTarefa )
+router.delete("/tarefas/:id", deletarTarefa);
 
-router.patch("/tarefas/:id", alterarTarefa)
+router.patch("/tarefas/:id", alterarTarefa);
 
 module.exports = router;
