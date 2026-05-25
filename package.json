@@ -7,7 +7,8 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "start:dev": "nodemon servidor.js"
+    "start:dev": "nodemon servidor.js",
+    "start": "node servidor.js"
   },
   "dependencies": {
     "dotenv": "^17.4.2",

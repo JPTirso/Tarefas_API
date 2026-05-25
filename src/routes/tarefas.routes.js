@@ -4,8 +4,6 @@ const router = express.Router();
 
 const TarefaController = require("../controllers/tarefas.controller");
 
-const validarTarefas = require("../middlewares/tarefas.middlewares");
-
 router.post("/tarefas", TarefaController.criarTarefas);
 
 router.get("/tarefas", TarefaController.buscarTarefas);

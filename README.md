@@ -77,6 +77,12 @@ Modo desenvolvimento:
 npm run start:dev
 ```
 
+Modo normal:
+
+```bash
+npm run start
+```
+
 # Endpoints
 
 ## Criar tarefa
