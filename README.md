@@ -47,7 +47,7 @@ git clone https://github.com/JPTirso/API-de-gerenciar-tarefas.git
 Entre na pasta:
 
 ```bash
-cd nome-do-projeto
+cd API-de-gerenciar-tarefas
 ```
 
 Instale as dependências:
