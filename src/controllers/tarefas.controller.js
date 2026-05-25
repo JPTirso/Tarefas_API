@@ -1,77 +1,63 @@
 const crypto = require("crypto");
+const Tarefa = require("../models/TarefaModel");
 
-const tarefas = [];
+class TarefaController {
+  async criarTarefas(req, res) {
+    try {
+      const novaTarefa = await Tarefa.create(req.body);
+      return res.status(201).json(novaTarefa);
+    } catch (error) {
+      res.status(400).send(error.message);
+    }
+  }
+  async buscarTarefas(req, res) {
+    try {
+      const tarefas = await Tarefa.find();
+      res.status(200).json(tarefas);
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
+  async buscarTarefasById(req, res) {
+    try {
+      const id = req.params.id;
+      const tarefaid = await Tarefa.findById(id);
+      if (tarefaid) {
+        return res.status(200).json(tarefaid);
+      }
+      res.status(404).send("Tarefa não encontrada");
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
 
-function criarTarefas(req, res) {
-  try {
-    const tarefa = req.body;
-    tarefa.id = crypto.randomUUID();
-    tarefa.concluida = false;
-    tarefas.push(tarefa);
-    return res.status(201).send(`Tarefa ${tarefa.titulo} criada`);
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
-}
-function buscarTarefas(req, res) {
-  try {
-    res.status(200).json(tarefas);
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
-}
-function buscarTarefasById(req, res) {
-  try {
-    const id = req.params.id;
-    const tarefaid = tarefas.find((tarefa) => tarefa.id == id);
-    if (tarefaid) {
-      return res.status(200).json(tarefaid);
-    }
-    res.status(404).send("Tarefa não encontrada");
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
-}
-
-function deletarTarefa(req, res) {
-  try {
-    const id = req.params.id;
-    const indice = tarefas.findIndex((tarefa) => tarefa.id == id);
-    if (indice !== -1) {
-      tarefas.splice(indice, 1);
-      return res.status(200).send("Tarefa deletada");
-    }
-    res.status(404).send("Tarefa não encontrada");
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
-}
-function alterarTarefa(req, res) {
-  try {
-    const id = req.params.id
-    const update = req.body
-    const indice = tarefas.findIndex((tarefa) => tarefa.id == id);
-    if (indice !== -1) {
-      if (update.titulo){
-        tarefas[indice]["titulo"] = update.titulo
+  async deletarTarefa(req, res) {
+    try {
+      const id = req.params.id;
+      const tarefaid = await Tarefa.findByIdAndDelete(id);
+      if (tarefaid) {
+        return res.status(200).json(tarefaid);
       }
-      if (update.descricao){
-        tarefas[indice]["descricao"] = update.descricao
-      }
-      if (update.concluida != undefined){
-        tarefas[indice]["concluida"] = update.concluida
-      }
-      return res.status(200).json(tarefas[indice])
+      res.status(404).send("Tarefa não encontrada");
+    } catch (error) {
+      res.status(500).send(error.message);
     }
-    res.status(404).send("Tarefa não encontrada")
-  } catch (error) {
-    res.status(500).send(error.message);
+  }
+  async alterarTarefa(req, res) {
+    try {
+      const id = req.params.id;
+      const update = req.body;
+      const tarefaUpdate = await Tarefa.findByIdAndUpdate(id, update, {
+        returnDocument: "after",
+        runValidators: true,
+      });
+      if (tarefaUpdate) {
+        return res.status(200).json(tarefaUpdate);
+      }
+      res.status(404).send("Tarefa não encontrada");
+    } catch (error) {
+      res.status(400).send(error.message);
+    }
   }
 }
-module.exports = {
-  criarTarefas,
-  buscarTarefas,
-  buscarTarefasById,
-  deletarTarefa,
-  alterarTarefa,
-};
+module.exports = new TarefaController();

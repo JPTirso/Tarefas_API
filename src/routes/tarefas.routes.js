@@ -2,24 +2,18 @@ const express = require("express");
 
 const router = express.Router();
 
-const {
-  criarTarefas,
-  buscarTarefas,
-  buscarTarefasById,
-  deletarTarefa,
-  alterarTarefa,
-} = require("../controllers/tarefas.controller");
+const TarefaController = require("../controllers/tarefas.controller");
 
 const validarTarefas = require("../middlewares/tarefas.middlewares");
 
-router.post("/tarefas", validarTarefas, criarTarefas);
+router.post("/tarefas", validarTarefas, TarefaController.criarTarefas);
 
-router.get("/tarefas", buscarTarefas);
+router.get("/tarefas", TarefaController.buscarTarefas);
 
-router.get("/tarefas/:id", buscarTarefasById);
+router.get("/tarefas/:id", TarefaController.buscarTarefasById);
 
-router.delete("/tarefas/:id", deletarTarefa);
+router.delete("/tarefas/:id", TarefaController.deletarTarefa);
 
-router.patch("/tarefas/:id", alterarTarefa);
+router.patch("/tarefas/:id", TarefaController.alterarTarefa);
 
 module.exports = router;
