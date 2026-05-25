@@ -6,7 +6,7 @@ const TarefaController = require("../controllers/tarefas.controller");
 
 const validarTarefas = require("../middlewares/tarefas.middlewares");
 
-router.post("/tarefas", validarTarefas, TarefaController.criarTarefas);
+router.post("/tarefas", TarefaController.criarTarefas);
 
 router.get("/tarefas", TarefaController.buscarTarefas);
 

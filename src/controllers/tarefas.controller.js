@@ -1,4 +1,3 @@
-const crypto = require("crypto");
 const Tarefa = require("../models/TarefaModel");
 
 class TarefaController {
@@ -25,7 +24,7 @@ class TarefaController {
       if (tarefaid) {
         return res.status(200).json(tarefaid);
       }
-      res.status(404).send("Tarefa não encontrada");
+      res.status(404).json({message : "Tarefa não encontrada"});
     } catch (error) {
       res.status(500).send(error.message);
     }
@@ -38,7 +37,7 @@ class TarefaController {
       if (tarefaid) {
         return res.status(200).json(tarefaid);
       }
-      res.status(404).send("Tarefa não encontrada");
+      res.status(404).json({message : "Tarefa não encontrada"});
     } catch (error) {
       res.status(500).send(error.message);
     }
@@ -54,7 +53,7 @@ class TarefaController {
       if (tarefaUpdate) {
         return res.status(200).json(tarefaUpdate);
       }
-      res.status(404).send("Tarefa não encontrada");
+      res.status(404).json({message : "Tarefa não encontrada"});
     } catch (error) {
       res.status(400).send(error.message);
     }
