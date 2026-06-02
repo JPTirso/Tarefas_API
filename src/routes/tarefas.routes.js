@@ -4,14 +4,14 @@ const router = express.Router();
 
 const TarefaController = require("../controllers/tarefas.controller");
 
-router.post("/tarefas", TarefaController.criarTarefas);
+router.post("/", TarefaController.criarTarefas);
 
-router.get("/tarefas", TarefaController.buscarTarefas);
+router.get("/", TarefaController.buscarTarefas);
 
-router.get("/tarefas/:id", TarefaController.buscarTarefasById);
+router.get("/:id", TarefaController.buscarTarefasById);
 
-router.delete("/tarefas/:id", TarefaController.deletarTarefa);
+router.delete("/:id", TarefaController.deletarTarefa);
 
-router.patch("/tarefas/:id", TarefaController.alterarTarefa);
+router.patch("/:id", TarefaController.alterarTarefa);
 
 module.exports = router;
