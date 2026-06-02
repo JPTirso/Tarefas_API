@@ -1,5 +1,6 @@
 const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 class UsersController {
   async registro(req, res) {
@@ -38,6 +39,39 @@ class UsersController {
       res.status(201).json({ message: "Usuario criado com sucesso" });
     } catch (error) {
       res.status(400).json({ message: error });
+    }
+  }
+
+  async login(req, res) {
+    const { password, email } = req.body;
+    if (!email || email.trim() === "") {
+      return res.status(400).json({ message: "Digite um email valido" });
+    }
+    if (!password || password.trim() === "") {
+      return res.status(400).json({ message: "Digite uma senha valida" });
+    }
+    try {
+      const user = await User.findOne({ email: email });
+      if (!user) {
+        return res.status(404).json({ message: "Email ou senha invalidos" });
+      }
+      const senhaValida = await bcrypt.compare(password, user.password)
+      if (!senhaValida) {
+        return res.status(404).json({ message: "Email ou senha invalidos" });
+      }
+      const token = jwt.sign(
+        {
+          id: user._id
+        },
+        process.env.SECRET,
+        {
+            expiresIn:"7d"
+        }
+      );
+      res.status(200).json({token: token})
+
+    } catch (error) {
+      res.status(500).json({ message: error });
     }
   }
 }
