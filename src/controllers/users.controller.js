@@ -74,6 +74,11 @@ class UsersController {
       res.status(500).json({ message: error });
     }
   }
+
+ async testeAuth(req, res){
+    const user = await User.findById(req.userid)
+    res.status(200).json(user, "-password")
+  }
 }
 
 module.exports = new UsersController();
