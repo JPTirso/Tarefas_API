@@ -61,7 +61,8 @@ class UsersController {
       }
       const token = jwt.sign(
         {
-          id: user._id
+          id: user._id,
+          role: user.role
         },
         process.env.SECRET,
         {
@@ -76,8 +77,8 @@ class UsersController {
   }
 
  async testeAuth(req, res){
-    const user = await User.findById(req.userid)
-    res.status(200).json(user, "-password")
+    const user = await User.findById(req.userId).select("-password")
+    res.status(200).json(user)
   }
 }
 
