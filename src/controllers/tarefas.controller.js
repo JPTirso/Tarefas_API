@@ -1,23 +1,31 @@
 const Tarefa = require("../models/TarefaModel");
-
+const ObjectId = require("mongoose")
 class TarefaController {
-  async criarTarefas(req, res) {
+  async create(req, res) {
     try {
-      const novaTarefa = await Tarefa.create(req.body);
+      const {titulo, descricao} = req.body
+      if (!titulo || titulo.trim() == "") return res.status(400).json({message: "Titulo não informado"})
+      if (!descricao || descricao.trim() == "") return res.status(400).json({message: "Descrição não informado"})
+      const novaTarefa = await Tarefa.create({
+        titulo,
+        descricao
+      });
       return res.status(201).json(novaTarefa);
     } catch (error) {
-      res.status(400).send(error.message);
+      console.log(error)
+      res.status(500).json({message: "Erro interno"});
     }
   }
-  async buscarTarefas(req, res) {
+  async index(req, res) {
     try {
       const tarefas = await Tarefa.find();
       res.status(200).json(tarefas);
     } catch (error) {
-      res.status(500).send(error.message);
+      console.log(error)
+      res.status(500).json({message: "Erro interno"});
     }
   }
-  async buscarTarefasById(req, res) {
+  async show(req, res) {
     try {
       const id = req.params.id;
       const tarefaid = await Tarefa.findById(id);
@@ -26,11 +34,12 @@ class TarefaController {
       }
       res.status(404).json({message : "Tarefa não encontrada"});
     } catch (error) {
-      res.status(500).send(error.message);
+      console.log(error)
+      res.status(500).json({message: "Erro interno"});
     }
   }
 
-  async deletarTarefa(req, res) {
+  async delete(req, res) {
     try {
       const id = req.params.id;
       const tarefaid = await Tarefa.findByIdAndDelete(id);
@@ -39,13 +48,17 @@ class TarefaController {
       }
       res.status(404).json({message : "Tarefa não encontrada"});
     } catch (error) {
-      res.status(500).send(error.message);
+      console.log(error)
+      res.status(500).json({message: "Erro interno"});
     }
   }
-  async alterarTarefa(req, res) {
+  async update(req, res) {
     try {
       const id = req.params.id;
-      const update = req.body;
+      const {titulo, descricao} = req.body
+      if (!titulo || titulo.trim() == "") return res.status(400).json({message: "Titulo não informado"})
+      if (!descricao || descricao.trim() == "") return res.status(400).json({message: "Descrição não informado"})
+      const update = {titulo, descricao};
       const tarefaUpdate = await Tarefa.findByIdAndUpdate(id, update, {
         returnDocument: "after",
         runValidators: true,
@@ -55,7 +68,8 @@ class TarefaController {
       }
       res.status(404).json({message : "Tarefa não encontrada"});
     } catch (error) {
-      res.status(400).send(error.message);
+      console.log(error)
+      res.status(500).json({message: "Erro interno"});
     }
   }
 }

@@ -2,16 +2,16 @@ const express = require("express");
 
 const router = express.Router();
 
-const TarefaController = require("../controllers/tarefas.controller");
+const controller = require("../controllers/tarefas.controller");
 
-router.post("/", TarefaController.criarTarefas);
+router.post("/", controller.create);
 
-router.get("/", TarefaController.buscarTarefas);
+router.get("/", controller.index);
 
-router.get("/:id", TarefaController.buscarTarefasById);
+router.get("/:id", controller.show);
 
-router.delete("/:id", TarefaController.deletarTarefa);
+router.delete("/:id", controller.delete);
 
-router.patch("/:id", TarefaController.alterarTarefa);
+router.patch("/:id", controller.update);
 
 module.exports = router;
