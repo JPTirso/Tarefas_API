@@ -15,6 +15,11 @@ const TarefaSchema = new Schema({
     concluida:{
         type: Boolean,
         default: false
+    },
+    userId:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
     }
 })
 

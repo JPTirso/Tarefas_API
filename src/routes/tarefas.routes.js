@@ -3,15 +3,16 @@ const express = require("express");
 const router = express.Router();
 
 const controller = require("../controllers/tarefas.controller");
+const auth = require("../middleware/auth.middleware")
 
-router.post("/", controller.create);
+router.post("/", auth, controller.create);
 
-router.get("/", controller.index);
+router.get("/", auth, controller.index);
 
-router.get("/:id", controller.show);
+router.get("/:id", auth, controller.show);
 
-router.delete("/:id", controller.delete);
+router.delete("/:id", auth, controller.delete);
 
-router.patch("/:id", controller.update);
+router.patch("/:id", auth, controller.update);
 
 module.exports = router;
