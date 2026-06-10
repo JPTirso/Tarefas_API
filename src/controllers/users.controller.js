@@ -2,8 +2,9 @@ const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-class UsersController {
+class UsersController { 
   async registro(req, res) {
+    try {
     const { nome, email, password, confirmPassword } = req.body;
     if (!nome || nome.trim() === "") {
       return res.status(400).json({ message: "Digite um nome valido" });
@@ -30,7 +31,6 @@ class UsersController {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    try {
       const novoUsuario = await User.create({
         nome,
         email,
@@ -76,7 +76,7 @@ class UsersController {
     }
   }
 
- async testeAuth(req, res){
+ async view(req, res){
     const user = await User.findById(req.userId).select("-password")
     res.status(200).json(user)
   }

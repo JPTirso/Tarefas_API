@@ -79,7 +79,7 @@ class TarefaController {
       if (descricao && descricao.trim() != "" && tarefaAntiga.descricao != descricao){
         update.descricao = descricao
       }
-      if (concluida && concluida.trim() != ""  && tarefaAntiga.concluida != concluida){
+      if (concluida && tarefaAntiga.concluida != concluida){
         update.concluida = concluida
       }
       if (Object.keys(update).length === 0) return res.status(400).json({message: "Insira alguma mudança"})
