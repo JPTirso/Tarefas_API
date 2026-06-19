@@ -12,4 +12,6 @@ router.get("/", auth, controller.view);
 
 router.patch("/", auth, controller.update)
 
+router.post("/refresh", controller.refresh)
+
 module.exports = router;

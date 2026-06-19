@@ -186,6 +186,54 @@ class UsersController {
       res.status(500).json({ message: "Erro interno" });
     }
   }
+  async refresh(req, res) {
+    const tokenHeader = req.headers.authorization;
+    if (!tokenHeader) {
+      return res.status(401).json({ message: "Token não encontrado" });
+    }
+    const token = tokenHeader.split(" ")[1];
+    try {
+      const decoded = jwt.verify(token, process.env.REFRESHSECRET);
+      const id = decoded.id;
+      const user = await User.findById(id);
+      if (!user || user.refreshToken != token)
+        return res.status(401).json({ message: "Token invalido" });
+      const refreshToken = jwt.sign(
+        {
+          id: id,
+        },
+        process.env.REFRESHSECRET,
+        {
+          expiresIn: "30d",
+        },
+      );
+
+      const acessToken = jwt.sign(
+        {
+          id: id,
+          role: user.role,
+        },
+        process.env.ACESSSECRET,
+        {
+          expiresIn: "15min",
+        },
+      );
+
+      await User.findByIdAndUpdate(
+        id,
+        { refreshToken: refreshToken },
+        {
+          runValidators: true,
+        },
+      );
+      res
+        .status(201)
+        .json({ refreshToken: refreshToken, acessToken: acessToken });
+    } catch (error) {
+      console.log(error);
+      return res.status(401).json({ message: "Token invalido" });
+    }
+  }
 }
 
 module.exports = new UsersController();
