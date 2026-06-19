@@ -19,6 +19,9 @@ const UserSchema = new Schema({
     role:{
         type:String,
         default: "user"
+    },
+    refreshToken:{
+        type:String
     }
 })
 

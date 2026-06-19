@@ -8,13 +8,17 @@ function auth (req,res,next){
     const token = authHeader.split(" ")[1]
     try{
 
-        const decoded = jwt.verify(token, process.env.SECRET)
+        const decoded = jwt.verify(token, process.env.ACESSSECRET)
         req.userId = decoded.id
         req.userRole = decoded.role
 
         next()
     }catch(error){
-        return res.status(401).json({message: "Token invalido"})
+        console.log(error)
+        if (error.name == "TokenExpiredError"){
+
+        }
+          return res.status(401).json({ message: "Token invalido" });
     }
 }
 
