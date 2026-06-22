@@ -234,6 +234,29 @@ class UsersController {
       return res.status(401).json({ message: "Token invalido" });
     }
   }
+  async logout(req, res) {
+    const id = req.userId;
+    try {
+      await User.findByIdAndUpdate(
+        id,
+        {
+          refreshToken: null,
+        },
+        {
+          runValidators: true,
+        },
+      );
+
+      return res.status(200).json({
+        message: "Logout realizado com sucesso",
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: "Erro interno",
+      });
+    }
+  }
 }
 
 module.exports = new UsersController();

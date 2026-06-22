@@ -14,4 +14,6 @@ router.patch("/", auth, controller.update)
 
 router.post("/refresh", controller.refresh)
 
+router.get("/logout", auth, controller.logout)
+
 module.exports = router;
