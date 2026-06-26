@@ -10,7 +10,7 @@ const TarefaSchema = new Schema({
     },
     descricao: {
         type: String,
-        required: true
+        required: false
     },
     concluida:{
         type: Boolean,
