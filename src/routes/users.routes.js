@@ -6,13 +6,13 @@ const auth = require("../middleware/auth.middleware");
 const validation = require("../middleware/validation.middleware")
 const userSchema = require("../validation/user.schema")
 
-router.post("/registro",validation(userSchema.create), controller.registro);
+router.post("/registro",validation.body(userSchema.create), controller.registro);
 
-router.post("/login",validation(userSchema.login) , controller.login);
+router.post("/login", validation.body(userSchema.login), controller.login);
 
 router.get("/", auth, controller.view);
 
-router.patch("/", auth, validation(userSchema.update), controller.update);
+router.patch("/", auth, validation.body(userSchema.update), controller.update);
 
 router.post("/refresh", controller.refresh)
 

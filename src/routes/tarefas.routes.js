@@ -7,14 +7,14 @@ const auth = require("../middleware/auth.middleware");
 const validation = require("../middleware/validation.middleware");
 const tarefaSchema = require("../validation/tarefa.schema");
 
-router.post("/", auth, validation(tarefaSchema.create), controller.create);
+router.post("/", auth, validation.body(tarefaSchema.create), controller.create);
 
 router.get("/", auth, controller.index);
 
-router.get("/:id", auth, controller.show);
+router.get("/:id", auth, validation.id, controller.show);
 
-router.delete("/:id", auth, controller.delete);
+router.delete("/:id", auth, validation.id, controller.delete);
 
-router.patch("/:id", auth, validation(tarefaSchema.update), controller.update);
+router.patch("/:id", auth, validation.id, validation.body(tarefaSchema.update), controller.update);
 
 module.exports = router;
