@@ -16,7 +16,7 @@ function auth (req,res,next){
     }catch(error){
         console.log(error)
         if (error.name == "TokenExpiredError"){
-
+            return res.status(401).json({message: "Token expirado, renove com o refresh token"})
         }
           return res.status(401).json({ message: "Token invalido" });
     }

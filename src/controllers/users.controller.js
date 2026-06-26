@@ -7,28 +7,9 @@ class UsersController {
   async registro(req, res) {
     try {
       const { nome, email, password, confirmPassword } = req.body;
-      if (!nome || nome.trim() === "") {
-        return res.status(400).json({ message: "Digite um nome valido" });
-      }
-      if (!email || email.trim() === "") {
-        return res.status(400).json({ message: "Digite um email valido" });
-      }
       const emailExist = await User.findOne({ email: email });
-      if (emailExist) {
+      if (emailExist)
         return res.status(400).json({ message: "Email ja cadastrado" });
-      }
-
-      if (!password || password.trim() === "") {
-        return res.status(400).json({ message: "Digite uma senha valida" });
-      }
-      if (!confirmPassword || confirmPassword.trim() === "") {
-        return res.status(400).json({ message: "Confirme sua senha" });
-      }
-      if (confirmPassword !== password) {
-        return res
-          .status(400)
-          .json({ message: "A senha confirmada é diferente da senha posta" });
-      }
 
       const passwordHash = await bcrypt.hash(password, 10);
 
@@ -79,12 +60,6 @@ class UsersController {
 
   async login(req, res) {
     const { password, email } = req.body;
-    if (!email || email.trim() === "") {
-      return res.status(400).json({ message: "Digite um email valido" });
-    }
-    if (!password || password.trim() === "") {
-      return res.status(400).json({ message: "Digite uma senha valida" });
-    }
     try {
       const user = await User.findOne({ email: email });
       if (!user) {
@@ -147,10 +122,10 @@ class UsersController {
       const userAntigo = await User.findById(id);
       if (!userAntigo)
         return res.status(404).json({ message: "Usuario não encontrada" });
-      if (nome && nome.trim() != "" && userAntigo.nome != nome) {
+      if (nome && userAntigo.nome != nome) {
         update.nome = nome;
       }
-      if (email && email.trim() != "" && userAntigo.email != email) {
+      if (email && userAntigo.email != email) {
         const emailExist = await User.findOne({ email: email });
         if (emailExist)
           return res
@@ -158,13 +133,7 @@ class UsersController {
             .json({ message: "Já existe um usuario com esse email" });
         update.email = email;
       }
-      if (password && password.trim() != "") {
-        if (!confirmPassword || confirmPassword.trim() == "")
-          return res.status(400).json({ message: "Confirme sua senha" });
-        if (password != confirmPassword)
-          return res
-            .status(400)
-            .json({ message: "A senha confirmada é diferente da senha posta" });
+      if (password) {
         const mesmaSenha = await bcrypt.compare(password, userAntigo.password);
         if (mesmaSenha)
           return res

@@ -3,14 +3,16 @@ const router = express.Router();
 
 const controller = require("../controllers/users.controller");
 const auth = require("../middleware/auth.middleware");
+const validation = require("../middleware/validation.middleware")
+const userSchema = require("../validation/user.schema")
 
-router.post("/registro", controller.registro);
+router.post("/registro",validation(userSchema.create), controller.registro);
 
-router.post("/login", controller.login);
+router.post("/login",validation(userSchema.login) , controller.login);
 
 router.get("/", auth, controller.view);
 
-router.patch("/", auth, controller.update)
+router.patch("/", auth, validation(userSchema.update), controller.update);
 
 router.post("/refresh", controller.refresh)
 

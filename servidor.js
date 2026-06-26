@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const dotenv = require("dotenv");
 const startDB = require("./src/database/connection");
+const teste = require("./src/validation/user.schema");
 
 const tarefasRoutes = require("./src/routes/tarefas.routes");
 const usersRoutes = require("./src/routes/users.routes");
