@@ -53,7 +53,8 @@ class UsersController {
         acessToken: acessToken,
       });
     } catch (error) {
-      res.status(400).json({ message: error });
+      console.log(error);
+      res.status(500).json({ message: "Erro interno" });
     }
   }
 
@@ -104,7 +105,8 @@ class UsersController {
         acessToken: acessToken,
       });
     } catch (error) {
-      res.status(500).json({ message: error });
+      console.log(error);
+      res.status(500).json({ message: "Erro interno" });
     }
   }
 
@@ -150,6 +152,7 @@ class UsersController {
       });
       res.status(200).json({ message: "Alteração feita com sucesso" });
     } catch (error) {
+      console.log(error);
       console.log(error);
       res.status(500).json({ message: "Erro interno" });
     }
