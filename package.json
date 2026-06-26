@@ -5,7 +5,7 @@
   "license": "ISC",
   "author": "JPTirso",
   "type": "commonjs",
-  "main": "index.js",
+  "main": "servidor.js",
   "scripts": {
     "start:dev": "nodemon servidor.js",
     "start": "node servidor.js"

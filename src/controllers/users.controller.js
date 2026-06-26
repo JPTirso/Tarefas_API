@@ -1,7 +1,6 @@
 const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
 
 class UsersController {
   async registro(req, res) {
