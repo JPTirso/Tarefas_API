@@ -8,13 +8,14 @@ const startDB = require("./src/database/connection");
 
 const tarefasRoutes = require("./src/routes/tarefas.routes");
 const usersRoutes = require("./src/routes/users.routes");
+const admRoutes = require("./src/routes/adm.routes")
 
 app.use(express.json());
 startDB();
 
 app.use("/tarefas", tarefasRoutes);
-
 app.use("/users", usersRoutes);
+app.use("/adm", admRoutes)
 
 const port = 3939;
 
