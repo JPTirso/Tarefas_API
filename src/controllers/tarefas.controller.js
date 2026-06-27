@@ -76,7 +76,7 @@ class TarefaController {
       if (descricao && tarefaAntiga.descricao != descricao){
         update.descricao = descricao
       }
-      if (typeof concluida === "boolean" && arefaAntiga.concluida != concluida) {
+      if (typeof concluida === "boolean" && tarefaAntiga.concluida != concluida) {
         update.concluida = concluida;
       }
       if (Object.keys(update).length === 0) return res.status(400).json({message: "Insira alguma mudança"})

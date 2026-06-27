@@ -12,4 +12,6 @@ router.get("/users", auth, perm, controller.Index);
 
 router.get("/users/:id", auth, perm, validation.id, controller.viewUser);
 
+router.delete("/users/:id", auth, perm, validation.id, controller.deleteUser)
+
 module.exports = router;

@@ -1,6 +1,8 @@
 const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { findById } = require("../models/TarefaModel");
+const Tarefa = require("../models/TarefaModel");
 
 class UsersController {
   async registro(req, res) {
@@ -100,7 +102,7 @@ class UsersController {
       );
 
       res.status(201).json({
-        message: "Usuario atualizado com sucesso",
+        message: "Usuario logado com sucesso",
         refreshToken: refreshToken,
         acessToken: acessToken,
       });
@@ -111,7 +113,9 @@ class UsersController {
   }
 
   async view(req, res) {
-    const user = await User.findById(req.userId).select("-password");
+    const user = await User.findById(req.userId).select(
+      "id nome email role"
+    );
     res.status(200).json(user);
   }
 
@@ -226,6 +230,19 @@ class UsersController {
       return res.status(500).json({
         message: "Erro interno",
       });
+    }
+  }
+  async delete(req, res) {
+    const id = req.userId;
+    try {
+      const user = await User.findByIdAndDelete(id);
+      if (!user)
+        return res.status(404).json({ message: "Usuario não encontrado" });
+      await Tarefa.deleteMany({ userId: id });
+      res.status(200).json({ message: "Usuario deletado com sucesso" });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Erro interno" });
     }
   }
 }

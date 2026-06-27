@@ -14,6 +14,8 @@ router.get("/", auth, controller.view);
 
 router.patch("/", auth, validation.body(userSchema.update), controller.update);
 
+router.delete("/", auth, controller.delete)
+
 router.post("/refresh", controller.refresh)
 
 router.get("/logout", auth, controller.logout)
