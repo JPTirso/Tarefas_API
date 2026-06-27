@@ -1,55 +1,90 @@
 # Tarefas API
 
-API REST para gerenciamento de tarefas com autenticação JWT. Cada usuário gerencia apenas suas próprias tarefas, com total isolamento de dados entre contas.
+![Node](https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/express-5.x-000000?logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/mongodb-atlas-47A248?logo=mongodb&logoColor=white)
+![JWT](https://img.shields.io/badge/auth-JWT-orange)
+![License](https://img.shields.io/badge/license-ISC-blue)
+
+API REST para gerenciamento de tarefas pessoais, com autenticação via JWT (access token + refresh token) e um painel administrativo simples baseado em papéis (`user` / `admin`). Cada usuário só acessa e manipula as próprias tarefas — o isolamento de dados é garantido em nível de query, filtrando sempre por `userId`.
+
+## Sumário
+
+- [Tecnologias](#tecnologias)
+- [Pré-requisitos](#pré-requisitos)
+- [Instalação](#instalação)
+- [Variáveis de ambiente](#variáveis-de-ambiente)
+- [Executando o projeto](#executando-o-projeto)
+- [Estrutura do projeto](#estrutura-do-projeto)
+- [Modelos de dados](#modelos-de-dados)
+- [Autenticação](#autenticação)
+- [Rotas — Usuários](#rotas--usuários-users)
+- [Rotas — Tarefas](#rotas--tarefas-tarefas)
+- [Rotas — Administração](#rotas--administração-adm)
+- [Formato de erros de validação](#formato-de-erros-de-validação)
+- [Códigos de resposta](#códigos-de-resposta)
+- [Licença](#licença)
+
+---
 
 ## Tecnologias
 
-- **Node.js** com Express 5
-- **MongoDB** via Mongoose
-- **JWT** para autenticação
-- **Bcrypt** para hash de senhas
-- **Dotenv** para variáveis de ambiente
+| Camada              | Tecnologia                                |
+|---------------------|-------------------------------------------|
+| Runtime             | Node.js                                   |
+| Framework HTTP      | Express 5                                 |
+| Banco de dados      | MongoDB (via Mongoose), hospedado no Atlas|
+| Autenticação        | JSON Web Token (access + refresh)         |
+| Hash de senha       | bcrypt                                    |
+| Validação de schema | Zod                                       |
+| Configuração        | dotenv                                    |
+| Hot reload (dev)    | nodemon                                   |
 
----
+## Pré-requisitos
+
+- Node.js 18 ou superior
+- npm
+- Um cluster MongoDB Atlas configurado, com o IP da máquina liberado na lista de acesso
 
 ## Instalação
 
 ```bash
-# Clone o repositório
-git clone <https://github.com/JPTirso/Tarefas_API.git>
+git clone https://github.com/JPTirso/Tarefas_API.git
 cd Tarefas_API
-
-# Instale as dependências
 npm install
 ```
 
-### Variáveis de ambiente
+## Variáveis de ambiente
 
-Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+Crie um arquivo `.env` na raiz do projeto:
 
 ```env
 MONGODB_USERNAME=seu_usuario_mongodb
 MONGODB_PASSWORD=sua_senha_mongodb
-SECRET=sua_chave_secreta_jwt
+ACESSSECRET=sua_chave_secreta_para_o_access_token
+REFRESHSECRET=sua_chave_secreta_para_o_refresh_token
 ```
 
-> A string de conexão aponta para um cluster MongoDB Atlas. Certifique-se de que o IP da sua máquina está liberado no Atlas.
+| Variável            | Descrição                                                                 |
+|---------------------|----------------------------------------------------------------------------|
+| `MONGODB_USERNAME`  | Usuário do banco no cluster Atlas                                          |
+| `MONGODB_PASSWORD`  | Senha do usuário do banco                                                   |
+| `ACESSSECRET`       | Chave usada para assinar o **access token** (validade curta)               |
+| `REFRESHSECRET`     | Chave usada para assinar o **refresh token** (validade longa)              |
 
----
+> O host do cluster está fixo em `src/database/connection.js`; apenas as credenciais vêm do `.env`. Se for usar outro cluster, ajuste a string de conexão diretamente nesse arquivo.
 
-## Rodando o projeto
+## Executando o projeto
 
 ```bash
 # Produção
 npm start
 
-# Desenvolvimento (com hot reload via nodemon)
+# Desenvolvimento (hot reload via nodemon)
 npm run start:dev
 ```
 
 O servidor sobe na porta **3939**.
-
----
 
 ## Estrutura do projeto
 
@@ -58,69 +93,77 @@ Tarefas_API-main/
 ├── servidor.js                        # Entry point
 └── src/
     ├── controllers/
+    │   ├── adm.controller.js          # Listagem, visualização e remoção de usuários (admin)
     │   ├── tarefas.controller.js      # CRUD de tarefas
-    │   └── users.controller.js        # Registro, login e atualização de usuário
+    │   └── users.controller.js        # Registro, login, refresh, logout, perfil e conta
     ├── database/
     │   └── connection.js              # Conexão com MongoDB Atlas
     ├── middleware/
-    │   ├── auth.middleware.js         # Verificação do JWT
-    │   └── perm.middleware.js         # Verificação de role admin
+    │   ├── auth.middleware.js         # Verificação do access token
+    │   ├── perm.middleware.js         # Verificação de role "admin"
+    │   └── validation.middleware.js   # Validação de body e de :id via Zod
     ├── models/
     │   ├── TarefaModel.js             # Schema de tarefas
     │   └── UserModel.js               # Schema de usuários
-    └── routes/
-        ├── tarefas.routes.js          # Rotas de tarefas
-        └── users.routes.js            # Rotas de usuários
+    ├── routes/
+    │   ├── adm.routes.js              # Rotas administrativas
+    │   ├── tarefas.routes.js          # Rotas de tarefas
+    │   └── users.routes.js            # Rotas de usuários
+    └── validation/
+        ├── id.schema.js               # Validação de ObjectId
+        ├── tarefa.schema.js           # Validação de payloads de tarefa
+        └── user.schema.js             # Validação de payloads de usuário
 ```
-
----
 
 ## Modelos de dados
 
 ### User
 
-| Campo      | Tipo     | Obrigatório | Padrão  |
-|------------|----------|-------------|---------|
-| `nome`     | String   | Sim         | —       |
-| `email`    | String   | Sim         | —       |
-| `password` | String   | Sim         | —       |
-| `role`     | String   | Não         | `"user"` |
+| Campo          | Tipo     | Obrigatório | Padrão   | Observações                                 |
+|----------------|----------|-------------|----------|---------------------------------------------|
+| `nome`         | String   | Sim         | —        | 3–100 caracteres                            |
+| `email`        | String   | Sim         | —        | Único, indexado                             |
+| `password`     | String   | Sim         | —        | Armazenada com hash bcrypt                  |
+| `role`         | String   | Não         | `"user"` | Não há rota para promoção a `"admin"`       |
+| `refreshToken` | String   | Não         | —        | Token de sessão ativo, usado em `/refresh`  |
 
 ### Tarefa
 
 | Campo       | Tipo      | Obrigatório | Padrão  |
 |-------------|-----------|-------------|---------|
 | `titulo`    | String    | Sim         | —       |
-| `descricao` | String    | Sim         | —       |
+| `descricao` | String    | Não         | —       |
 | `concluida` | Boolean   | Não         | `false` |
 | `userId`    | ObjectId  | Sim         | —       |
 
-> Cada tarefa é vinculada ao usuário que a criou via `userId`. Todas as operações de leitura, atualização e deleção filtram por `userId`, garantindo que um usuário nunca acesse dados de outro.
-
----
+> Toda operação de leitura, atualização e remoção de tarefas filtra pelo `userId` do token, garantindo que um usuário nunca acesse dados de outro.
 
 ## Autenticação
 
-Rotas protegidas exigem um token JWT no header:
+A API usa um par de tokens:
+
+| Token           | Assinado com    | Validade  | Uso                                                          |
+|-----------------|-----------------|-----------|--------------------------------------------------------------|
+| Access token    | `ACESSSECRET`   | 15 min    | Enviado no header `Authorization` das rotas protegidas       |
+| Refresh token   | `REFRESHSECRET` | 30 dias   | Enviado apenas em `POST /users/refresh` para gerar novo par  |
 
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <access_token>
 ```
 
-O token é obtido na rota `POST /users/login` e tem validade de **7 dias**.
+O refresh token é persistido no documento do usuário (`refreshToken`). Ao fazer `POST /users/refresh`, a API confirma que o token enviado é válido **e** corresponde ao que está salvo no banco antes de emitir um novo par. `GET /users/logout` invalida o refresh token atual, setando-o como `null`.
 
----
+## Rotas — Usuários (`/users`)
 
-## Rotas
-
-### Usuários — `/users`
-
-| Método | Rota        | Auth | Descrição                        |
-|--------|-------------|------|----------------------------------|
-| POST   | `/registro` | Não  | Cria uma nova conta              |
-| POST   | `/login`    | Não  | Autentica e retorna o JWT        |
-| GET    | `/`         | Sim  | Retorna o perfil do usuário logado |
-| PATCH  | `/`         | Sim  | Atualiza dados do usuário logado |
+| Método | Rota        | Auth          | Descrição                                             |
+|--------|-------------|---------------|-------------------------------------------------------|
+| POST   | `/registro` | Não           | Cria uma conta e retorna o par de tokens              |
+| POST   | `/login`    | Não           | Autentica e retorna um novo par de tokens             |
+| POST   | `/refresh`  | Refresh token | Gera um novo par de tokens                            |
+| GET    | `/`         | Sim           | Retorna o perfil do usuário autenticado               |
+| PATCH  | `/`         | Sim           | Atualiza nome, email e/ou senha do usuário autenticado|
+| DELETE | `/`         | Sim           | Remove a conta do usuário autenticado e suas tarefas  |
+| GET    | `/logout`   | Sim           | Invalida o refresh token atual                        |
 
 #### POST `/users/registro`
 
@@ -128,39 +171,57 @@ O token é obtido na rota `POST /users/login` e tem validade de **7 dias**.
 {
   "nome": "Jonh Doe",
   "email": "jonhdoe@email.com",
-  "password": "12345",
-  "confirmPassword": "12345"
+  "password": "123456",
+  "confirmPassword": "123456"
 }
 ```
 
 **Resposta 201:**
 ```json
-{ "message": "Usuario criado com sucesso" }
+{
+  "message": "Usuario criado com sucesso",
+  "refreshToken": "<jwt>",
+  "acessToken": "<jwt>"
+}
 ```
-
----
 
 #### POST `/users/login`
 
 ```json
 {
   "email": "jonhdoe@email.com",
-  "password": "12345"
+  "password": "123456"
 }
 ```
 
-**Resposta 200:**
+**Resposta 201:**
 ```json
-{ "token": "<jwt>" }
+{
+  "message": "Usuario atualizado com sucesso",
+  "refreshToken": "<jwt>",
+  "acessToken": "<jwt>"
+}
 ```
 
----
+#### POST `/users/refresh`
 
-#### GET `/users/`  *(requer auth)*
+Envie o refresh token no mesmo header de autorização:
 
-Retorna os dados do usuário autenticado. A senha nunca é incluída na resposta.
+```
+Authorization: Bearer <refresh_token>
+```
 
-**Resposta 200:**
+**Resposta 201:**
+```json
+{ "refreshToken": "<novo_jwt>", "acessToken": "<novo_jwt>" }
+```
+
+**Resposta 401** se o token estiver expirado, inválido, ou não corresponder ao armazenado no usuário.
+
+#### GET `/users/` *(requer access token)*
+
+**Resposta 200:** documento do usuário autenticado, apenas com os campos "id nome email role"
+
 ```json
 {
   "_id": "...",
@@ -170,36 +231,51 @@ Retorna os dados do usuário autenticado. A senha nunca é incluída na resposta
 }
 ```
 
----
+#### PATCH `/users/` *(requer access token)*
 
-#### PATCH `/users/`  *(requer auth)*
-
-Atualiza um ou mais campos do usuário autenticado. Envie apenas os campos que deseja alterar.
+Envie apenas os campos que deseja alterar.
 
 ```json
 {
   "nome": "Jane Doe",
   "email": "novo@email.com",
-  "password": "123455",
-  "confirmPassword": "123456"
+  "password": "novaSenha123",
+  "confirmPassword": "novaSenha123"
 }
 ```
 
 **Regras:**
-- O email novo não pode estar em uso por outro usuário.
+- `confirmPassword` é obrigatório quando `password` é enviado, e deve ser idêntico a ele.
+- O novo email não pode estar em uso por outro usuário.
 - A nova senha não pode ser igual à senha atual.
-- `confirmPassword` é obrigatório quando `password` é enviado.
+- Pelo menos um campo precisa representar uma mudança real; caso contrário, retorna 400.
 
 **Resposta 200:**
 ```json
 { "message": "Alteração feita com sucesso" }
 ```
 
----
+#### DELETE `/users/` *(requer access token)*
 
-### Tarefas — `/tarefas`
+Remove a conta do usuário autenticado e todas as tarefas associadas a ela.
 
-Todas as rotas exigem autenticação. As operações são sempre filtradas pelo usuário autenticado.
+**Resposta 200:**
+```json
+{ "message": "Usuario deletado com sucesso" }
+```
+
+#### GET `/users/logout` *(requer access token)*
+
+Invalida o refresh token atual do usuário.
+
+**Resposta 200:**
+```json
+{ "message": "Logout realizado com sucesso" }
+```
+
+## Rotas — Tarefas (`/tarefas`)
+
+Todas as rotas exigem access token e operam apenas sobre as tarefas do usuário autenticado.
 
 | Método | Rota   | Descrição                           |
 |--------|--------|-------------------------------------|
@@ -218,13 +294,9 @@ Todas as rotas exigem autenticação. As operações são sempre filtradas pelo 
 }
 ```
 
-**Resposta 201:** retorna o objeto da tarefa criada.
-
----
+**Resposta 201:** objeto da tarefa criada, com `concluida: false` por padrão.
 
 #### GET `/tarefas/`
-
-Retorna um array com todas as tarefas do usuário autenticado.
 
 **Resposta 200:**
 ```json
@@ -239,46 +311,78 @@ Retorna um array com todas as tarefas do usuário autenticado.
 ]
 ```
 
----
-
 #### GET `/tarefas/:id`
 
-Retorna a tarefa com o ID especificado, desde que pertença ao usuário autenticado.
-
-**Resposta 404** se não encontrada ou pertencer a outro usuário.
-
----
+**Resposta 404** se a tarefa não existir ou pertencer a outro usuário.
 
 #### PATCH `/tarefas/:id`
 
-Atualiza campos da tarefa. Envie apenas o que deseja alterar. Campos iguais aos valores atuais são ignorados.
+Envie apenas os campos a alterar (`titulo`, `descricao` e/ou `concluida`). Campos iguais ao valor atual são ignorados.
 
 ```json
 {
-  "titulo": "Novo título",
-  "concluida": true
+  "titulo": "Novo título"
 }
 ```
 
 **Resposta 400** se nenhuma mudança real for detectada.
 
----
-
 #### DELETE `/tarefas/:id`
 
-Remove a tarefa. Retorna o objeto deletado em caso de sucesso.
+Remove a tarefa e retorna o objeto deletado.
 
 **Resposta 404** se não encontrada ou pertencer a outro usuário.
 
----
+## Rotas — Administração (`/adm`)
+
+Todas as rotas exigem access token de um usuário com `role: "admin"`.
+
+| Método | Rota             | Descrição                                               |
+|--------|------------------|---------------------------------------------------------|
+| GET    | `/users`         | Lista todos os usuários (`id`, `nome`, `email`, `role`) |
+| GET    | `/users/:id`     | Retorna um usuário e suas tarefas                       |
+| DELETE | `/users/:id`     | Remove um usuário e todas as suas tarefas               |
+
+**Resposta 403** se o usuário autenticado não tiver `role: "admin"`.
+
+#### GET `/adm/users/:id`
+
+**Resposta 200:**
+```json
+{
+  "user": { "nome": "...", "email": "...", "role": "user" },
+  "tarefas": [ { "titulo": "...", "descricao": "...", "concluida": false } ]
+}
+```
+
+## Formato de erros de validação
+
+Erros de corpo de requisição e de parâmetro `:id` seguem o mesmo formato, retornado com status **400**:
+
+```json
+{
+  "errors": [
+    { "field": "email", "message": "Insira um email valido" }
+  ]
+}
+```
 
 ## Códigos de resposta
 
-| Código | Significado                                       |
-|--------|---------------------------------------------------|
-| 200    | Sucesso                                           |
-| 201    | Recurso criado                                    |
-| 400    | Dados inválidos ou sem alterações detectadas      |
-| 401    | Token ausente ou inválido                         |
-| 404    | Recurso não encontrado                            |
-| 500    | Erro interno do servidor                          |
+| Código | Significado                                   |
+|--------|-----------------------------------------------|
+| 200    | Sucesso                                       |
+| 201    | Recurso criado / operação concluída           |
+| 400    | Dados inválidos ou sem alterações detectadas  |
+| 401    | Token ausente, inválido ou expirado           |
+| 403    | Usuário autenticado sem permissão (rota admin)|
+| 404    | Recurso não encontrado                        |
+| 500    | Erro interno do servidor                      |
+
+## Licença
+
+Distribuído sob a licença ISC. Veja o campo `license` em `package.json`.
+
+---
+
+Desenvolvido por **JPTirso**.
